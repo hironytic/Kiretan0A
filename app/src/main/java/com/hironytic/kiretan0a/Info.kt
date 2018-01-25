@@ -1,3 +1,7 @@
 package com.hironytic.kiretan0a
 
-data class Info(val message: String)
+import android.databinding.ObservableField
+
+class Info {
+    val message = ObservableField<String>()
+}
