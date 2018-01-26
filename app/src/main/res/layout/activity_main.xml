@@ -3,7 +3,8 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools">
     <data>
-        <variable name="info" type="com.hironytic.kiretan0a.Info" />
+        <variable name="viewModel" type="com.hironytic.kiretan0a.MainActivity.ViewModel" />
+        <variable name="handlers" type="com.hironytic.kiretan0a.MainActivity.Handlers" />
     </data>
     <android.support.design.widget.CoordinatorLayout
         android:layout_width="match_parent"
@@ -41,7 +42,7 @@
                 app:layout_constraintLeft_toLeftOf="parent"
                 app:layout_constraintRight_toRightOf="parent"
                 app:layout_constraintTop_toTopOf="parent"                
-                android:text="@{info.message}"
+                android:text="@{viewModel.message}"
                 tools:text="Message" />
         </android.support.constraint.ConstraintLayout>
 
@@ -51,7 +52,8 @@
             android:layout_height="wrap_content"
             android:layout_gravity="bottom|end"
             android:layout_margin="@dimen/fab_margin"
-            app:srcCompat="@drawable/ic_add_white_24dp" />
+            app:srcCompat="@drawable/ic_add_white_24dp"
+            android:onClick="@{handlers::onClickFab}"/>
         
     </android.support.design.widget.CoordinatorLayout>
 </layout>
