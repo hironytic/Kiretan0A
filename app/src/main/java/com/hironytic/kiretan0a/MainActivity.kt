@@ -5,6 +5,7 @@ import android.arch.lifecycle.ViewModelProviders
 import android.databinding.DataBindingUtil
 import android.support.v7.app.AppCompatActivity
 import android.os.Bundle
+import android.support.v7.widget.Toolbar
 import com.hironytic.kiretan0a.databinding.ActivityMainBinding
 
 class MainActivity : AppCompatActivity() {
@@ -12,6 +13,9 @@ class MainActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         val binding = DataBindingUtil.setContentView<ActivityMainBinding>(this, R.layout.activity_main)
+
+        setSupportActionBar(binding.toolbar)
+
         val info = Info()
         binding.info = info
         
@@ -21,7 +25,8 @@ class MainActivity : AppCompatActivity() {
                 info.message.set(it)
             }
         })
-        
+
+
         viewModel.message.value = "Wao!"
     }
 }
