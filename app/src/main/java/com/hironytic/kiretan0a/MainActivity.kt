@@ -94,9 +94,6 @@ class MainActivity : AppCompatActivity() {
         binding.viewModel = bindingViewModel
         binding.handlers = Handlers(viewModel)
         
-        val itemListAdapter = ItemListAdapter()
-        binding.itemList.adapter = itemListAdapter
-        
         viewModel.title.observe(this, Observer<String> {
             if (it != null) {
                 bindingViewModel.title.set(it)
@@ -104,36 +101,39 @@ class MainActivity : AppCompatActivity() {
         })
         
         viewModel.itemList.observe(this, Observer<MainViewItemList> {
-            
             if (it != null) {
-                when (it.hint) {
-                    UpdateHint.Whole -> {
-                        itemListAdapter.updateItems(it.viewModels.map { convertItemViewModel(it) })
-                    }
-                    is UpdateHint.Partial -> {
-                        for (change in it.hint.changes) {
-                            when (change) {
-                                is UpdateHint.Change.Inserted -> {
-                                    itemListAdapter.insertItem(change.index, convertItemViewModel(it.viewModels[change.index]))
-                                }
-                                is UpdateHint.Change.Deleted -> {
-                                    itemListAdapter.removeItem(change.index)
-                                }
-                                is UpdateHint.Change.Moved -> {
-                                    itemListAdapter.moveItem(change.oldIndex, change.newIndex)
+                if (binding.itemList.adapter == null) {
+                    val itemListAdapter = ItemListAdapter()
+                    itemListAdapter.updateItems(it.viewModels.map { convertItemViewModel(it) })
+                    binding.itemList.adapter = itemListAdapter
+                } else {
+                    val itemListAdapter = binding.itemList.adapter as ItemListAdapter
+                    when (it.hint) {
+                        UpdateHint.Whole -> {
+                            itemListAdapter.updateItems(it.viewModels.map { convertItemViewModel(it) })
+                        }
+                        is UpdateHint.Partial -> {
+                            for (change in it.hint.changes) {
+                                when (change) {
+                                    is UpdateHint.Change.Inserted -> {
+                                        itemListAdapter.insertItem(change.index, convertItemViewModel(it.viewModels[change.index]))
+                                    }
+                                    is UpdateHint.Change.Deleted -> {
+                                        itemListAdapter.removeItem(change.index)
+                                    }
+                                    is UpdateHint.Change.Moved -> {
+                                        itemListAdapter.moveItem(change.oldIndex, change.newIndex)
+                                    }
                                 }
                             }
                         }
-                    }
-                    UpdateHint.None -> {
-                        // do nothing
+                        UpdateHint.None -> {
+                            // do nothing
+                        }
                     }
                 }
             }
         })
-
-        viewModel.itemList.value = MainViewItemList(emptyList(), UpdateHint.Whole)
-        viewModel.title.value = "Wao!"
     }
 
     private fun convertItemViewModel(itemViewModel: MainItemViewModel): ItemViewModel {

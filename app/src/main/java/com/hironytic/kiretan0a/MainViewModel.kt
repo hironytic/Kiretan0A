@@ -20,4 +20,9 @@ class MainViewItemList(val viewModels: List<MainItemViewModel>, val hint: Update
 class MainViewModel : ViewModel() {
     val title = MutableLiveData<String>()
     val itemList = MutableLiveData<MainViewItemList>()
+    
+    init {
+        title.value = "Wao!"
+        itemList.value = MainViewItemList(emptyList(), UpdateHint.Whole)
+    }
 }
