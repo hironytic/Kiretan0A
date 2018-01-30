@@ -3,13 +3,13 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools">
     <data>
-        <variable name="model" type="com.hironytic.kiretan0a.MainActivity.BindingModel" />
-        <variable name="handlers" type="com.hironytic.kiretan0a.MainActivity.Handlers" />
+        <variable name="model" type="com.hironytic.kiretan0a.view.main.MainActivity.BindingModel" />
+        <variable name="handlers" type="com.hironytic.kiretan0a.view.main.MainActivity.Handlers" />
     </data>
     <android.support.design.widget.CoordinatorLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        tools:context="com.hironytic.kiretan0a.MainActivity">
+        tools:context="com.hironytic.kiretan0a.view.main.MainActivity">
         
         <android.support.design.widget.AppBarLayout
             android:layout_width="match_parent"

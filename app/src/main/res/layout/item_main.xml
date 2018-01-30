@@ -4,7 +4,7 @@
     xmlns:tools="http://schemas.android.com/tools">
 
     <data>
-        <variable name="model" type="com.hironytic.kiretan0a.MainActivity.ItemBindingModel" />
+        <variable name="model" type="com.hironytic.kiretan0a.view.main.MainActivity.ItemBindingModel" />
     </data>
     
     <android.support.constraint.ConstraintLayout
