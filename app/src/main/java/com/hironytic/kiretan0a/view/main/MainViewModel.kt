@@ -1,4 +1,4 @@
-package com.hironytic.kiretan0a
+package com.hironytic.kiretan0a.view.main
 
 import android.arch.lifecycle.MutableLiveData
 import android.arch.lifecycle.ViewModel

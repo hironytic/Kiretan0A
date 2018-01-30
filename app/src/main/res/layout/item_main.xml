@@ -4,7 +4,7 @@
     xmlns:tools="http://schemas.android.com/tools">
 
     <data>
-        <variable name="viewModel" type="com.hironytic.kiretan0a.MainActivity.ItemViewModel" />
+        <variable name="model" type="com.hironytic.kiretan0a.view.main.MainActivity.ItemBindingModel" />
     </data>
     
     <android.support.constraint.ConstraintLayout
@@ -18,7 +18,7 @@
             android:layout_marginBottom="8dp"
             android:layout_marginStart="8dp"
             android:layout_marginTop="8dp"
-            android:text="@{viewModel.name}"
+            android:text="@{model.name}"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent"
