@@ -1,9 +1,8 @@
 package com.hironytic.kiretan0a.view.main
 
-import android.arch.lifecycle.Observer
+import android.arch.lifecycle.LifecycleOwner
 import android.arch.lifecycle.ViewModelProviders
 import android.databinding.DataBindingUtil
-import android.databinding.ObservableField
 import android.support.v7.app.AppCompatActivity
 import android.os.Bundle
 import android.support.v7.widget.RecyclerView
@@ -13,14 +12,16 @@ import android.view.ViewGroup
 import com.hironytic.kiretan0a.R
 import com.hironytic.kiretan0a.databinding.ActivityMainBinding
 import com.hironytic.kiretan0a.databinding.ItemMainBinding
+import com.hironytic.kiretan0a.view.util.observeSafely
+import com.hironytic.kiretan0a.view.util.toObservableField
 
 class MainActivity : AppCompatActivity() {
-    class BindingModel {
-        val title = ObservableField<String>()
+    class BindingModel(owner: LifecycleOwner, viewModel: MainViewModel) {
+        val title = viewModel.title.toObservableField(owner)
     }
     
-    class ItemBindingModel {
-        val name = ObservableField<String>()
+    class ItemBindingModel(owner: LifecycleOwner, itemViewModel: MainItemViewModel) {
+        val name = itemViewModel.name.toObservableField(owner)
     }
     
     class Handlers(private val viewModel: MainViewModel) {
@@ -39,9 +40,9 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
-    class ItemViewHolder(val binding: ItemMainBinding) : RecyclerView.ViewHolder(binding.root)
+    private class ItemViewHolder(val binding: ItemMainBinding) : RecyclerView.ViewHolder(binding.root)
     
-    class ItemListAdapter : RecyclerView.Adapter<ItemViewHolder>() {
+    private class ItemListAdapter : RecyclerView.Adapter<ItemViewHolder>() {
         private val items = ArrayList<ItemBindingModel>()
         
         override fun getItemCount(): Int = items.size
@@ -91,58 +92,40 @@ class MainActivity : AppCompatActivity() {
 
         viewModel = ViewModelProviders.of(this).get(MainViewModel::class.java)
         
-        val bindingModel = BindingModel()
-        binding.model = bindingModel
+        binding.model = BindingModel(this, viewModel)
         binding.handlers = Handlers(viewModel)
         
-        viewModel.title.observe(this, Observer<String> {
-            if (it != null) {
-                bindingModel.title.set(it)
-            }
-        })
-        
-        viewModel.itemList.observe(this, Observer<MainViewItemList> {
-            if (it != null) {
-                if (binding.itemList.adapter == null) {
-                    val itemListAdapter = ItemListAdapter()
-                    itemListAdapter.updateItems(it.viewModels.map { convertItemViewModel(it) })
-                    binding.itemList.adapter = itemListAdapter
-                } else {
-                    val itemListAdapter = binding.itemList.adapter as ItemListAdapter
-                    when (it.hint) {
-                        UpdateHint.Whole -> {
-                            itemListAdapter.updateItems(it.viewModels.map { convertItemViewModel(it) })
-                        }
-                        is UpdateHint.Partial -> {
-                            for (change in it.hint.changes) {
-                                when (change) {
-                                    is UpdateHint.Change.Inserted -> {
-                                        itemListAdapter.insertItem(change.index, convertItemViewModel(it.viewModels[change.index]))
-                                    }
-                                    is UpdateHint.Change.Deleted -> {
-                                        itemListAdapter.removeItem(change.index)
-                                    }
-                                    is UpdateHint.Change.Moved -> {
-                                        itemListAdapter.moveItem(change.oldIndex, change.newIndex)
-                                    }
+        viewModel.itemList.observeSafely(this) { itemList ->
+            if (binding.itemList.adapter == null) {
+                val itemListAdapter = ItemListAdapter()
+                itemListAdapter.updateItems(itemList.viewModels.map { ItemBindingModel(this, it) })
+                binding.itemList.adapter = itemListAdapter
+            } else {
+                val itemListAdapter = binding.itemList.adapter as ItemListAdapter
+                when (itemList.hint) {
+                    UpdateHint.Whole -> {
+                        itemListAdapter.updateItems(itemList.viewModels.map { ItemBindingModel(this, it) })
+                    }
+                    is UpdateHint.Partial -> {
+                        for (change in itemList.hint.changes) {
+                            when (change) {
+                                is UpdateHint.Change.Inserted -> {
+                                    itemListAdapter.insertItem(change.index, ItemBindingModel(this, itemList.viewModels[change.index]))
+                                }
+                                is UpdateHint.Change.Deleted -> {
+                                    itemListAdapter.removeItem(change.index)
+                                }
+                                is UpdateHint.Change.Moved -> {
+                                    itemListAdapter.moveItem(change.oldIndex, change.newIndex)
                                 }
                             }
                         }
-                        UpdateHint.None -> {
-                            // do nothing
-                        }
+                    }
+                    UpdateHint.None -> {
+                        // do nothing
                     }
                 }
             }
-        })
+        }
     }
-
-    private fun convertItemViewModel(itemViewModel: MainItemViewModel): ItemBindingModel {
-        val converted = ItemBindingModel()
-        itemViewModel.name.observe(this, Observer<String> {
-            converted.name.set(it)
-        })
-        return converted
-    }
-
 }
