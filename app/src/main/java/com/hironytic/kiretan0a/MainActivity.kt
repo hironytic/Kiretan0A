@@ -14,11 +14,11 @@ import com.hironytic.kiretan0a.databinding.ActivityMainBinding
 import com.hironytic.kiretan0a.databinding.ItemMainBinding
 
 class MainActivity : AppCompatActivity() {
-    class ViewModel {
+    class BindingModel {
         val title = ObservableField<String>()
     }
     
-    class ItemViewModel {
+    class ItemBindingModel {
         val name = ObservableField<String>()
     }
     
@@ -41,7 +41,7 @@ class MainActivity : AppCompatActivity() {
     class ItemViewHolder(val binding: ItemMainBinding) : RecyclerView.ViewHolder(binding.root)
     
     class ItemListAdapter : RecyclerView.Adapter<ItemViewHolder>() {
-        private val items = ArrayList<ItemViewModel>()
+        private val items = ArrayList<ItemBindingModel>()
         
         override fun getItemCount(): Int = items.size
 
@@ -51,14 +51,14 @@ class MainActivity : AppCompatActivity() {
         }
 
         override fun onBindViewHolder(holder: ItemViewHolder?, position: Int) {
-            val vm = items[position]
+            val bm = items[position]
             holder?.apply { 
-                binding.viewModel = vm
+                binding.model = bm
             }
         }
         
-        fun insertItem(index: Int, viewModel: ItemViewModel) {
-            items.add(index, viewModel)
+        fun insertItem(index: Int, bindingModel: ItemBindingModel) {
+            items.add(index, bindingModel)
             notifyItemInserted(index)
         }
         
@@ -72,7 +72,7 @@ class MainActivity : AppCompatActivity() {
             notifyItemMoved(oldIndex, newIndex)
         }
         
-        fun updateItems(items: List<ItemViewModel>) {
+        fun updateItems(items: List<ItemBindingModel>) {
             this.items.clear()
             this.items.addAll(items)
             notifyDataSetChanged()
@@ -90,13 +90,13 @@ class MainActivity : AppCompatActivity() {
 
         viewModel = ViewModelProviders.of(this).get(MainViewModel::class.java)
         
-        val bindingViewModel = ViewModel()
-        binding.viewModel = bindingViewModel
+        val bindingModel = BindingModel()
+        binding.model = bindingModel
         binding.handlers = Handlers(viewModel)
         
         viewModel.title.observe(this, Observer<String> {
             if (it != null) {
-                bindingViewModel.title.set(it)
+                bindingModel.title.set(it)
             }
         })
         
@@ -136,8 +136,8 @@ class MainActivity : AppCompatActivity() {
         })
     }
 
-    private fun convertItemViewModel(itemViewModel: MainItemViewModel): ItemViewModel {
-        val converted = ItemViewModel()
+    private fun convertItemViewModel(itemViewModel: MainItemViewModel): ItemBindingModel {
+        val converted = ItemBindingModel()
         itemViewModel.name.observe(this, Observer<String> {
             converted.name.set(it)
         })
