@@ -12,6 +12,7 @@ import android.view.ViewGroup
 import com.hironytic.kiretan0a.R
 import com.hironytic.kiretan0a.databinding.ActivityMainBinding
 import com.hironytic.kiretan0a.databinding.ItemMainBinding
+import com.hironytic.kiretan0a.view.util.UpdateHint
 import com.hironytic.kiretan0a.view.util.observeSafely
 import com.hironytic.kiretan0a.view.util.toObservableField
 
