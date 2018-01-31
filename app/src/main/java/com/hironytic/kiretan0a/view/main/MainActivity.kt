@@ -27,18 +27,7 @@ class MainActivity : AppCompatActivity() {
     
     class Handlers(private val viewModel: MainViewModel) {
         @Suppress("UNUSED_PARAMETER")
-        fun onClickFab(view: View) {
-            viewModel.title.value = viewModel.title.value + "!"            
-            
-            val viewModels = ArrayList<MainItemViewModel>()
-            viewModels.addAll(viewModel.itemList.value!!.viewModels)
-            
-            val newViewModel = MainItemViewModel()
-            newViewModel.name.value = "Wao!"
-            viewModels.add(newViewModel)
-
-            viewModel.itemList.value = MainViewItemList(viewModels, UpdateHint.Partial(listOf(UpdateHint.Change.Inserted(viewModels.size - 1))))
-        }
+        fun onAdd(view: View) = viewModel.onAdd()
     }
 
     private class ItemViewHolder(val binding: ItemMainBinding) : RecyclerView.ViewHolder(binding.root)
