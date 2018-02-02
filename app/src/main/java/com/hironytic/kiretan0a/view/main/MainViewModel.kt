@@ -36,18 +36,44 @@ class MainViewModel : ViewModel() {
     val itemList = MutableLiveData<MainViewItemList>()
     
     fun onAdd() {
-        val viewModels = ArrayList<MainItemViewModel>()
-        viewModels.addAll(itemList.value!!.viewModels)
+        val viewModels = itemList.value!!.viewModels.toMutableList()
+        val moved = viewModels.removeAt(2)
+        viewModels.add(6, moved)
 
-        val newViewModel = MainItemViewModel()
-        newViewModel.name.value = "Wao!"
-        viewModels.add(newViewModel)
+        val newVM = MainItemViewModel().apply { name.value = "Item New"}
+        viewModels.add(4, newVM)
 
-        itemList.value = MainViewItemList(viewModels, UpdateHint.Partial(listOf(UpdateHint.Change.Inserted(viewModels.size - 1, newViewModel))))
+        itemList.value = MainViewItemList(viewModels.toList(), UpdateHint.Partial(
+                listOf(UpdateHint.Change.Moved(2, 6), UpdateHint.Change.Inserted(4, newVM))
+        ))
     }
     
     init {
         title.value = "Wao!"
-        itemList.value = MainViewItemList(emptyList(), UpdateHint.Whole())
+
+
+        val list = listOf(
+                MainItemViewModel().apply { name.value = "Item 1" },
+                MainItemViewModel().apply { name.value = "Item 2" },
+                MainItemViewModel().apply { name.value = "Item 3" },
+                MainItemViewModel().apply { name.value = "Item 4" },
+                MainItemViewModel().apply { name.value = "Item 5" },
+                MainItemViewModel().apply { name.value = "Item 6" },
+                MainItemViewModel().apply { name.value = "Item 7" },
+                MainItemViewModel().apply { name.value = "Item 8" },
+                MainItemViewModel().apply { name.value = "Item 9" },
+                MainItemViewModel().apply { name.value = "Item 10" },
+                MainItemViewModel().apply { name.value = "Item 11" },
+                MainItemViewModel().apply { name.value = "Item 12" },
+                MainItemViewModel().apply { name.value = "Item 12" },
+                MainItemViewModel().apply { name.value = "Item 14" },
+                MainItemViewModel().apply { name.value = "Item 15" },
+                MainItemViewModel().apply { name.value = "Item 16" },
+                MainItemViewModel().apply { name.value = "Item 17" },
+                MainItemViewModel().apply { name.value = "Item 18" },
+                MainItemViewModel().apply { name.value = "Item 19" },
+                MainItemViewModel().apply { name.value = "Item 20" }
+        )
+        itemList.value = MainViewItemList(list, UpdateHint.Whole())
     }
 }
