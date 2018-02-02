@@ -118,14 +118,14 @@ class MainActivity : AppCompatActivity() {
             } else {
                 val itemListAdapter = binding.itemList.adapter as ItemListAdapter
                 when (itemList.hint) {
-                    UpdateHint.Whole -> {
+                    is UpdateHint.Whole -> {
                         itemListAdapter.updateItems(itemList.viewModels.map { ItemBindingModel(this, it) })
                     }
                     is UpdateHint.Partial -> {
                         for (change in itemList.hint.changes) {
                             when (change) {
                                 is UpdateHint.Change.Inserted -> {
-                                    itemListAdapter.insertItem(change.index, ItemBindingModel(this, itemList.viewModels[change.index]))
+                                    itemListAdapter.insertItem(change.index, ItemBindingModel(this, change.item))
                                 }
                                 is UpdateHint.Change.Deleted -> {
                                     itemListAdapter.removeItem(change.index)
@@ -136,7 +136,7 @@ class MainActivity : AppCompatActivity() {
                             }
                         }
                     }
-                    UpdateHint.None -> {
+                    is UpdateHint.None -> {
                         // do nothing
                     }
                 }

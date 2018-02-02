@@ -25,14 +25,14 @@
 
 package com.hironytic.kiretan0a.view.util
 
-sealed class UpdateHint {
-    object Whole: UpdateHint()
-    data class Partial(val changes: List<Change>): UpdateHint()
-    object None: UpdateHint()
+sealed class UpdateHint<T> {
+    class Whole<T>: UpdateHint<T>()
+    class Partial<T>(val changes: List<Change<T>>): UpdateHint<T>()
+    class None<T>: UpdateHint<T>()
 
-    sealed class Change {
-        data class Deleted(val index: Int) : Change()
-        data class Inserted(val index: Int) : Change()
-        data class Moved(val oldIndex: Int, val newIndex: Int) : Change()
+    sealed class Change<T> {
+        class Deleted<T>(val index: Int) : Change<T>()
+        class Inserted<T>(val index: Int, val item: T) : Change<T>()
+        class Moved<T>(val oldIndex: Int, val newIndex: Int) : Change<T>()
     }
 }

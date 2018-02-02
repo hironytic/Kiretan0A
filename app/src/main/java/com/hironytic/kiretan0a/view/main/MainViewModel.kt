@@ -29,7 +29,7 @@ import android.arch.lifecycle.MutableLiveData
 import android.arch.lifecycle.ViewModel
 import com.hironytic.kiretan0a.view.util.UpdateHint
 
-class MainViewItemList(val viewModels: List<MainItemViewModel>, val hint: UpdateHint)
+class MainViewItemList(val viewModels: List<MainItemViewModel>, val hint: UpdateHint<MainItemViewModel>)
 
 class MainViewModel : ViewModel() {
     val title = MutableLiveData<String>()
@@ -43,11 +43,11 @@ class MainViewModel : ViewModel() {
         newViewModel.name.value = "Wao!"
         viewModels.add(newViewModel)
 
-        itemList.value = MainViewItemList(viewModels, UpdateHint.Partial(listOf(UpdateHint.Change.Inserted(viewModels.size - 1))))
+        itemList.value = MainViewItemList(viewModels, UpdateHint.Partial(listOf(UpdateHint.Change.Inserted(viewModels.size - 1, newViewModel))))
     }
     
     init {
         title.value = "Wao!"
-        itemList.value = MainViewItemList(emptyList(), UpdateHint.Whole)
+        itemList.value = MainViewItemList(emptyList(), UpdateHint.Whole())
     }
 }
