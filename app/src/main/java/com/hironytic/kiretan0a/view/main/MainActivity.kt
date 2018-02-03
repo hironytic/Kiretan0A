@@ -37,6 +37,7 @@ import android.view.ViewGroup
 import com.hironytic.kiretan0a.R
 import com.hironytic.kiretan0a.databinding.ActivityMainBinding
 import com.hironytic.kiretan0a.databinding.ItemMainBinding
+import com.hironytic.kiretan0a.model.util.CollectionEvent
 import com.hironytic.kiretan0a.view.util.UpdateHint
 import com.hironytic.kiretan0a.view.util.observeSafely
 import com.hironytic.kiretan0a.view.util.toObservableField
@@ -122,15 +123,15 @@ class MainActivity : AppCompatActivity() {
                         itemListAdapter.updateItems(itemList.viewModels.map { ItemBindingModel(this, it) })
                     }
                     is UpdateHint.Partial -> {
-                        for (change in itemList.hint.changes) {
+                        for (change in itemList.hint.events) {
                             when (change) {
-                                is UpdateHint.Change.Inserted -> {
+                                is CollectionEvent.Inserted -> {
                                     itemListAdapter.insertItem(change.index, ItemBindingModel(this, change.item))
                                 }
-                                is UpdateHint.Change.Deleted -> {
+                                is CollectionEvent.Deleted -> {
                                     itemListAdapter.removeItem(change.index)
                                 }
-                                is UpdateHint.Change.Moved -> {
+                                is CollectionEvent.Moved -> {
                                     itemListAdapter.moveItem(change.oldIndex, change.newIndex)
                                 }
                             }

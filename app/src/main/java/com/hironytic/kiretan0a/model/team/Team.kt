@@ -1,5 +1,5 @@
 //
-// UpdateHint.kt
+// Team.kt
 // Kiretan0A
 //
 // Copyright (c) 2018 Hironori Ichimiya <hiron@hironytic.com>
@@ -23,12 +23,29 @@
 // THE SOFTWARE.
 //
 
-package com.hironytic.kiretan0a.view.util
+package com.hironytic.kiretan0a.model.team
 
-import com.hironytic.kiretan0a.model.util.CollectionEvent
+import com.hironytic.kiretan0a.model.util.Entity
+import com.hironytic.kiretan0a.model.util.RawEntity
 
-sealed class UpdateHint<T> {
-    class Whole<T>: UpdateHint<T>()
-    class Partial<T>(val events: List<CollectionEvent<T>>): UpdateHint<T>()
-    class None<T>: UpdateHint<T>()
+sealed class TeamError : Throwable() {
+    object InvalidDataStructure : TeamError()
+}
+
+class Team(
+    val teamID: String,
+    val name: String,
+    val error: TeamError? = null
+) : Entity {
+    private constructor(teamID: String, error: TeamError) : this(teamID, "", error)
+
+    companion object fun fromRawEntity(raw: RawEntity): Team {
+        val name = raw.data["name"] ?: ""
+        if (name is String) {
+            return Team(raw.documentID, name)
+        }
+        return Team(raw.documentID, TeamError.InvalidDataStructure)
+    }
+
+    fun raw(): RawEntity = RawEntity(teamID, mapOf("name" to name))
 }

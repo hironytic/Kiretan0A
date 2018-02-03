@@ -1,5 +1,5 @@
 //
-// UpdateHint.kt
+// TeamRepository.kt
 // Kiretan0A
 //
 // Copyright (c) 2018 Hironori Ichimiya <hiron@hironytic.com>
@@ -23,12 +23,22 @@
 // THE SOFTWARE.
 //
 
-package com.hironytic.kiretan0a.view.util
+package com.hironytic.kiretan0a.model.team
 
-import com.hironytic.kiretan0a.model.util.CollectionEvent
+import com.hironytic.kiretan0a.model.util.DataStore
+import io.reactivex.Observable
 
-sealed class UpdateHint<T> {
-    class Whole<T>: UpdateHint<T>()
-    class Partial<T>(val events: List<CollectionEvent<T>>): UpdateHint<T>()
-    class None<T>: UpdateHint<T>()
+interface TeamRepository {
+    fun team(teamID: String): Observable<Team?>
+}
+
+sealed class TeamRepositoryError : Throwable() {
+    object InvalidTeam : TeamRepositoryError()
+}
+
+class DefaultTeamRepository(private val dataStore: DataStore) : TeamRepository {
+    override fun team(teamID: String): Observable<Team?> {
+        val teamPath = dataStore.collection("team").document(teamID)
+        return dataStore.observeDocument(teamPath)
+    }
 }

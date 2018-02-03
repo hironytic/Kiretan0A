@@ -27,6 +27,7 @@ package com.hironytic.kiretan0a.view.main
 
 import android.arch.lifecycle.MutableLiveData
 import android.arch.lifecycle.ViewModel
+import com.hironytic.kiretan0a.model.util.CollectionEvent
 import com.hironytic.kiretan0a.view.util.UpdateHint
 
 class MainViewItemList(val viewModels: List<MainItemViewModel>, val hint: UpdateHint<MainItemViewModel>)
@@ -44,7 +45,7 @@ class MainViewModel : ViewModel() {
         viewModels.add(4, newVM)
 
         itemList.value = MainViewItemList(viewModels.toList(), UpdateHint.Partial(
-                listOf(UpdateHint.Change.Moved(2, 6), UpdateHint.Change.Inserted(4, newVM))
+                listOf(CollectionEvent.Moved(2, 6), CollectionEvent.Inserted(4, newVM))
         ))
     }
     

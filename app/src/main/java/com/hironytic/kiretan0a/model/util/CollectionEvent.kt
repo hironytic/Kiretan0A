@@ -1,5 +1,5 @@
 //
-// UpdateHint.kt
+// CollectionEvent.kt
 // Kiretan0A
 //
 // Copyright (c) 2018 Hironori Ichimiya <hiron@hironytic.com>
@@ -23,12 +23,10 @@
 // THE SOFTWARE.
 //
 
-package com.hironytic.kiretan0a.view.util
+package com.hironytic.kiretan0a.model.util
 
-import com.hironytic.kiretan0a.model.util.CollectionEvent
-
-sealed class UpdateHint<T> {
-    class Whole<T>: UpdateHint<T>()
-    class Partial<T>(val events: List<CollectionEvent<T>>): UpdateHint<T>()
-    class None<T>: UpdateHint<T>()
+sealed class CollectionEvent<T> {
+    class Deleted<T>(val index: Int) : CollectionEvent<T>()
+    class Inserted<T>(val index: Int, val item: T) : CollectionEvent<T>()
+    class Moved<T>(val oldIndex: Int, val newIndex: Int) : CollectionEvent<T>()
 }

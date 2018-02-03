@@ -1,5 +1,5 @@
 //
-// UpdateHint.kt
+// Entity.kt
 // Kiretan0A
 //
 // Copyright (c) 2018 Hironori Ichimiya <hiron@hironytic.com>
@@ -23,12 +23,8 @@
 // THE SOFTWARE.
 //
 
-package com.hironytic.kiretan0a.view.util
+package com.hironytic.kiretan0a.model.util
 
-import com.hironytic.kiretan0a.model.util.CollectionEvent
+data class RawEntity(val documentID: String, val data: Map<String, Any>)
 
-sealed class UpdateHint<T> {
-    class Whole<T>: UpdateHint<T>()
-    class Partial<T>(val events: List<CollectionEvent<T>>): UpdateHint<T>()
-    class None<T>: UpdateHint<T>()
-}
+interface Entity
