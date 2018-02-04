@@ -25,4 +25,5 @@
 -->
 <resources>
     <string name="app_name">Kiretan0A</string>
+    <string name="sign_in_anonymous">認証せずに新規の利用を開始する</string>
 </resources>
