@@ -29,11 +29,11 @@ import com.hironytic.kiretan0a.model.util.CollectionChange
 import com.hironytic.kiretan0a.model.util.DataStore
 import com.hironytic.kiretan0a.model.util.DefaultDataStore
 import io.reactivex.Completable
-import io.reactivex.Observable
+import io.reactivex.Flowable
 import io.reactivex.Single
 
 interface ItemRepository {
-    fun items(teamID: String, insufficient: Boolean): Observable<CollectionChange<Item>>
+    fun items(teamID: String, insufficient: Boolean): Flowable<CollectionChange<Item>>
 
     fun createItem(teamID: String, item: Item): Single<String>
     fun updateItem(teamID: String, item: Item): Completable
@@ -47,7 +47,7 @@ sealed class ItemRepositoryError : Throwable() {
 class DefaultItemRepository : ItemRepository {
     private val dataStore: DataStore = DefaultDataStore()
     
-    override fun items(teamID: String, insufficient: Boolean): Observable<CollectionChange<Item>> {
+    override fun items(teamID: String, insufficient: Boolean): Flowable<CollectionChange<Item>> {
         val itemPath = dataStore.collection("team").document(teamID).collection("item")
         val itemQuery = itemPath
                 .whereEqualTo("insufficient", insufficient)

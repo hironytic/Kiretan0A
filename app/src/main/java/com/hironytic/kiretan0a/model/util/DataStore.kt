@@ -26,7 +26,9 @@
 package com.hironytic.kiretan0a.model.util
 
 import com.google.firebase.firestore.*
+import io.reactivex.BackpressureStrategy
 import io.reactivex.Completable
+import io.reactivex.Flowable
 import io.reactivex.Observable
 import java.util.*
 
@@ -36,8 +38,8 @@ interface DataStore {
 
     fun collection(collectionID: String): CollectionPath
 
-    fun <E : Entity> observeDocument(documentPath: DocumentPath, factory: EntityFactory<E>): Observable<Optional<E>>
-    fun <E : Entity> observeCollection(query: DataStoreQuery, factory: EntityFactory<E>): Observable<CollectionChange<E>>
+    fun <E : Entity> observeDocument(documentPath: DocumentPath, factory: EntityFactory<E>): Flowable<Optional<E>>
+    fun <E : Entity> observeCollection(query: DataStoreQuery, factory: EntityFactory<E>): Flowable<CollectionChange<E>>
 
     fun write(block: (DocumentWriter) -> Unit): Completable
 }
@@ -85,40 +87,40 @@ class DefaultDataStore : DataStore {
         var registration: ListenerRegistration? = null
     }
 
-    override fun <E : Entity> observeDocument(documentPath: DocumentPath, factory: EntityFactory<E>): Observable<Optional<E>> {
+    override fun <E : Entity> observeDocument(documentPath: DocumentPath, factory: EntityFactory<E>): Flowable<Optional<E>> {
         val resourceSupplier = { RegistrationBox() }
         val disposer: (RegistrationBox) -> Unit = { box -> box.registration?.remove() }
         val sourceSupplier = { box: RegistrationBox ->
-            Observable.create<Optional<E>> { observer ->
+            Flowable.create<Optional<E>>({ emitter ->
                 box.registration = (documentPath as DefaultDocumentPath).documentRef.addSnapshotListener { documentSnapshot, error ->
                     if (error != null) {
-                        observer.onError(error)
+                        emitter.onError(error)
                     } else {
                         if (documentSnapshot.exists()) {
                             try {
                                 val entity = factory.fromRawEntity(RawEntity(documentSnapshot.id, documentSnapshot.data))
-                                observer.onNext(Optional.of(entity))
+                                emitter.onNext(Optional.of(entity))
                             } catch (error: Throwable) {
-                                observer.onError(error)
+                                emitter.onError(error)
                             }
                         } else {
-                            observer.onNext(Optional.empty())
+                            emitter.onNext(Optional.empty())
                         }
                     }
                 }
-            }
+            }, BackpressureStrategy.BUFFER)
         }
-        return Observable.using(resourceSupplier, sourceSupplier, disposer)
+        return Flowable.using(resourceSupplier, sourceSupplier, disposer)
     }
 
-    override fun <E : Entity> observeCollection(query: DataStoreQuery, factory: EntityFactory<E>): Observable<CollectionChange<E>> {
+    override fun <E : Entity> observeCollection(query: DataStoreQuery, factory: EntityFactory<E>): Flowable<CollectionChange<E>> {
         val resourceSupplier = { RegistrationBox() }
         val disposer: (RegistrationBox) -> Unit = { box -> box.registration?.remove() }
         val sourceSupplier = { box: RegistrationBox ->
-            Observable.create<CollectionChange<E>> { observer ->
+            Flowable.create<CollectionChange<E>>({ emitter ->
                 box.registration = (query as DefaultDataStoreQuery).query.addSnapshotListener { querySnapshot, error ->
                     if (error != null) {
-                        observer.onError(error)
+                        emitter.onError(error)
                     } else {
                         try {
                             val generatedEntities = mutableMapOf<String, E>()
@@ -140,15 +142,15 @@ class DefaultDataStore : DataStore {
                                     }
                                 }
                             }
-                            observer.onNext(CollectionChange(result, events))
+                            emitter.onNext(CollectionChange(result, events))
                         } catch (error: Throwable) {
-                            observer.onError(error)
+                            emitter.onError(error)
                         }
                     }
                 }
-            }
+            }, BackpressureStrategy.BUFFER)
         }
-        return Observable.using(resourceSupplier, sourceSupplier, disposer)
+        return Flowable.using(resourceSupplier, sourceSupplier, disposer)
     }
 
     override fun write(block: (DocumentWriter) -> Unit): Completable {
