@@ -25,56 +25,60 @@
 
 package com.hironytic.kiretan0a.view.main
 
-import android.arch.lifecycle.MutableLiveData
+import android.arch.lifecycle.LiveData
 import android.arch.lifecycle.ViewModel
+import com.hironytic.kiretan0a.model.item.DefaultItemRepository
+import com.hironytic.kiretan0a.model.item.ItemRepository
+import com.hironytic.kiretan0a.model.team.DefaultTeamRepository
+import com.hironytic.kiretan0a.model.team.TeamRepository
 import com.hironytic.kiretan0a.model.util.CollectionEvent
 import com.hironytic.kiretan0a.view.util.UpdateHint
+import com.hironytic.kiretan0a.view.util.toLiveData
 
 class MainViewItemList(val viewModels: List<MainItemViewModel>, val hint: UpdateHint<MainItemViewModel>)
 
 class MainViewModel : ViewModel() {
-    val title = MutableLiveData<String>()
-    val itemList = MutableLiveData<MainViewItemList>()
+    val title: LiveData<String>
+    val itemList: LiveData<MainViewItemList>
+
+    private val teamRepository: TeamRepository = DefaultTeamRepository()
+    private val itemRepository: ItemRepository = DefaultItemRepository()
+    
+    private val TEAMID = "TEST_TEAM_ID"
     
     fun onAdd() {
-        val viewModels = itemList.value!!.viewModels.toMutableList()
-        val moved = viewModels.removeAt(2)
-        viewModels.add(6, moved)
-
-        val newVM = MainItemViewModel().apply { name.value = "Item New"}
-        viewModels.add(4, newVM)
-
-        itemList.value = MainViewItemList(viewModels.toList(), UpdateHint.Partial(
-                listOf(CollectionEvent.Moved(2, 6), CollectionEvent.Inserted(4, newVM))
-        ))
     }
     
     init {
-        title.value = "Wao!"
+        title = teamRepository
+                .team(TEAMID)
+                .map { it.map({ it.name }).orElse("") }
+                .toLiveData()
 
-
-        val list = listOf(
-                MainItemViewModel().apply { name.value = "Item 1" },
-                MainItemViewModel().apply { name.value = "Item 2" },
-                MainItemViewModel().apply { name.value = "Item 3" },
-                MainItemViewModel().apply { name.value = "Item 4" },
-                MainItemViewModel().apply { name.value = "Item 5" },
-                MainItemViewModel().apply { name.value = "Item 6" },
-                MainItemViewModel().apply { name.value = "Item 7" },
-                MainItemViewModel().apply { name.value = "Item 8" },
-                MainItemViewModel().apply { name.value = "Item 9" },
-                MainItemViewModel().apply { name.value = "Item 10" },
-                MainItemViewModel().apply { name.value = "Item 11" },
-                MainItemViewModel().apply { name.value = "Item 12" },
-                MainItemViewModel().apply { name.value = "Item 12" },
-                MainItemViewModel().apply { name.value = "Item 14" },
-                MainItemViewModel().apply { name.value = "Item 15" },
-                MainItemViewModel().apply { name.value = "Item 16" },
-                MainItemViewModel().apply { name.value = "Item 17" },
-                MainItemViewModel().apply { name.value = "Item 18" },
-                MainItemViewModel().apply { name.value = "Item 19" },
-                MainItemViewModel().apply { name.value = "Item 20" }
-        )
-        itemList.value = MainViewItemList(list, UpdateHint.Whole())
+        itemList = itemRepository
+                .items(TEAMID, false)
+                .scan(MainViewItemList(listOf(), UpdateHint.Whole())) { acc, change ->
+                    val viewModels = acc.viewModels.toMutableList()
+                    val hintEvents = ArrayList<CollectionEvent<MainItemViewModel>>()
+                    for (event in change.events) {
+                        when (event) {
+                            is CollectionEvent.Inserted -> {
+                                val viewModel = MainItemViewModel().apply { name.value = event.item.name }
+                                viewModels.add(event.index, viewModel)
+                                hintEvents.add(CollectionEvent.Inserted(event.index, viewModel))
+                            }
+                            is CollectionEvent.Deleted -> {
+                                viewModels.removeAt(event.index)
+                                hintEvents.add(CollectionEvent.Deleted(event.index))
+                            }
+                            is CollectionEvent.Moved -> {
+                                viewModels.add(event.newIndex, viewModels.removeAt(event.oldIndex))
+                                hintEvents.add(CollectionEvent.Moved(event.oldIndex, event.newIndex))
+                            }
+                        }
+                    }
+                    MainViewItemList(viewModels, UpdateHint.Partial(hintEvents))
+                }
+                .toLiveData()
     }
 }
