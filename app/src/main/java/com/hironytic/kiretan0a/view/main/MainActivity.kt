@@ -29,10 +29,9 @@ import android.arch.lifecycle.LifecycleOwner
 import android.arch.lifecycle.ViewModelProviders
 import android.content.Intent
 import android.databinding.DataBindingUtil
-import android.support.v7.app.AppCompatActivity
 import android.os.Bundle
+import android.support.v7.app.AppCompatActivity
 import android.support.v7.widget.RecyclerView
-import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -40,8 +39,6 @@ import com.hironytic.kiretan0a.R
 import com.hironytic.kiretan0a.databinding.ActivityMainBinding
 import com.hironytic.kiretan0a.databinding.ItemMainBinding
 import com.hironytic.kiretan0a.model.useraccount.DefaultUserAccountRepository
-import com.hironytic.kiretan0a.model.useraccount.UserAccount
-import com.hironytic.kiretan0a.model.useraccount.UserAccountOrNot
 import com.hironytic.kiretan0a.model.util.CollectionEvent
 import com.hironytic.kiretan0a.view.util.UpdateHint
 import com.hironytic.kiretan0a.view.util.observeSafely
@@ -154,11 +151,9 @@ class MainActivity : AppCompatActivity() {
         // FIXME:
         val userAccountRepository = DefaultUserAccountRepository()
         userAccountRepository.currentUser
-                .subscribeBy { un ->
-                    when (un) {
-                        UserAccountOrNot.None -> {
-                            startActivity(Intent(this, WelcomeActivity::class.java))
-                        }
+                .subscribeBy { optUserAccount ->
+                    if (!optUserAccount.isPresent) {
+                        startActivity(Intent(this, WelcomeActivity::class.java))
                     }
                 }
     }

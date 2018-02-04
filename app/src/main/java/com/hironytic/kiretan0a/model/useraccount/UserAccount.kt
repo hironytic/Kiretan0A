@@ -27,10 +27,6 @@ package com.hironytic.kiretan0a.model.useraccount
 
 import com.google.firebase.auth.FirebaseUser
 
-sealed class UserAccountOrNot {
-    object None: UserAccountOrNot()
-}
-
-class UserAccount(val userID: String, val isAnonymous: Boolean) : UserAccountOrNot() {
+class UserAccount(val userID: String, val isAnonymous: Boolean) {
     constructor(user: FirebaseUser) : this(user.uid, user.isAnonymous)
 }

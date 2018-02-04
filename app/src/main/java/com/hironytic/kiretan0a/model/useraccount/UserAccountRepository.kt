@@ -29,31 +29,31 @@ import com.google.firebase.auth.FirebaseAuth
 import io.reactivex.Completable
 import io.reactivex.Observable
 import io.reactivex.ObservableEmitter
-import io.reactivex.disposables.Disposables
+import java.util.*
 
 interface UserAccountRepository {
-    val currentUser: Observable<UserAccountOrNot>
+    val currentUser: Observable<Optional<UserAccount>>
 
     fun signInAnonymously(): Completable
     fun signOut(): Completable
 }
 
 class DefaultUserAccountRepository : UserAccountRepository {
-    override val currentUser: Observable<UserAccountOrNot>
+    override val currentUser: Observable<Optional<UserAccount>>
     private val auth = FirebaseAuth.getInstance()
 
     init {
         class AuthStateListener : FirebaseAuth.AuthStateListener {
-            var observer: ObservableEmitter<UserAccountOrNot>? = null
+            var observer: ObservableEmitter<Optional<UserAccount>>? = null
             override fun onAuthStateChanged(auth: FirebaseAuth) {
-                observer?.onNext(auth.currentUser?.let { UserAccount(it) } ?: UserAccountOrNot.None)
+                observer?.onNext(Optional.ofNullable(auth.currentUser?.let { UserAccount(it) }))
             }
         }
         currentUser = Observable
                 .using({
                     AuthStateListener()
                 }, { listener ->
-                    Observable.create<UserAccountOrNot> { observer ->
+                    Observable.create<Optional<UserAccount>> { observer ->
                         listener.observer = observer
                         auth.addAuthStateListener(listener)
                     }

@@ -27,6 +27,7 @@ package com.hironytic.kiretan0a.model.util
 
 import io.reactivex.Completable
 import io.reactivex.Observable
+import java.util.*
 
 interface DataStore {
     val deletePlaceHolder: Any
@@ -34,7 +35,7 @@ interface DataStore {
 
     fun collection(collectionID: String): CollectionPath
 
-    fun <T: Entity> observeDocument(documentPath: DocumentPath): Observable<T?>
+    fun <T: Entity> observeDocument(documentPath: DocumentPath): Observable<Optional<T>>
     fun <T: Entity> observeCollection(query: DataStoreQuery): Observable<CollectionChange<T>>
 
     fun write(block: (DocumentWriter) -> Unit): Completable
@@ -68,3 +69,4 @@ interface DocumentWriter {
     fun merge(documentPath: DocumentPath, documentData: Map<String, Any>)
     fun delete(documentPath: DocumentPath)
 }
+
