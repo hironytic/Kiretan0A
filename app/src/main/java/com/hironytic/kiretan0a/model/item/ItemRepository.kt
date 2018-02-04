@@ -27,6 +27,7 @@ package com.hironytic.kiretan0a.model.item
 
 import com.hironytic.kiretan0a.model.util.CollectionChange
 import com.hironytic.kiretan0a.model.util.DataStore
+import com.hironytic.kiretan0a.model.util.DefaultDataStore
 import io.reactivex.Completable
 import io.reactivex.Observable
 import io.reactivex.Single
@@ -43,13 +44,15 @@ sealed class ItemRepositoryError : Throwable() {
     object InvalidItem : ItemRepositoryError()
 }
 
-class DefaultItemRepository(private val dataStore: DataStore) : ItemRepository {
+class DefaultItemRepository : ItemRepository {
+    private val dataStore: DataStore = DefaultDataStore()
+    
     override fun items(teamID: String, insufficient: Boolean): Observable<CollectionChange<Item>> {
         val itemPath = dataStore.collection("team").document(teamID).collection("item")
         val itemQuery = itemPath
                 .whereEqualTo("insufficient", insufficient)
                 .orderBy("last_change", true)
-        return dataStore.observeCollection(itemQuery)
+        return dataStore.observeCollection(itemQuery, Item.Factory)
     }
 
     private fun updateLastChange(data: Map<String, Any>): Map<String, Any> {

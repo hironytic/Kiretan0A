@@ -26,6 +26,7 @@
 package com.hironytic.kiretan0a.model.team
 
 import com.hironytic.kiretan0a.model.util.DataStore
+import com.hironytic.kiretan0a.model.util.DefaultDataStore
 import io.reactivex.Observable
 import java.util.*
 
@@ -37,9 +38,11 @@ sealed class TeamRepositoryError : Throwable() {
     object InvalidTeam : TeamRepositoryError()
 }
 
-class DefaultTeamRepository(private val dataStore: DataStore) : TeamRepository {
+class DefaultTeamRepository : TeamRepository {
+    private val dataStore: DataStore = DefaultDataStore()
+    
     override fun team(teamID: String): Observable<Optional<Team>> {
         val teamPath = dataStore.collection("team").document(teamID)
-        return dataStore.observeDocument(teamPath)
+        return dataStore.observeDocument(teamPath, Team.Factory)
     }
 }

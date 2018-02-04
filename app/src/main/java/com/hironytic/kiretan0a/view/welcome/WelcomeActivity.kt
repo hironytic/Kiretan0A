@@ -37,6 +37,7 @@ import com.hironytic.kiretan0a.view.main.MainActivity
 import com.hironytic.kiretan0a.view.main.MainViewModel
 
 class WelcomeActivity : AppCompatActivity() {
+    @Suppress("UNUSED_PARAMETER")
     class BindingModel(owner: LifecycleOwner, viewModel: WelcomeViewModel) {
     }
 

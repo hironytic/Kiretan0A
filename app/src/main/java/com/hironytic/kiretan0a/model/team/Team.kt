@@ -26,6 +26,7 @@
 package com.hironytic.kiretan0a.model.team
 
 import com.hironytic.kiretan0a.model.util.Entity
+import com.hironytic.kiretan0a.model.util.EntityFactory
 import com.hironytic.kiretan0a.model.util.RawEntity
 
 sealed class TeamError : Throwable() {
@@ -39,13 +40,15 @@ class Team(
 ) : Entity {
     private constructor(teamID: String, error: TeamError) : this(teamID, "", error)
 
-    companion object fun fromRawEntity(raw: RawEntity): Team {
-        val name = raw.data["name"] ?: ""
-        if (name is String) {
-            return Team(raw.documentID, name)
+    companion object Factory: EntityFactory<Team> {
+        override fun fromRawEntity(raw: RawEntity): Team {
+            val name = raw.data["name"] ?: ""
+            if (name is String) {
+                return Team(raw.documentID, name)
+            }
+            return Team(raw.documentID, TeamError.InvalidDataStructure)
         }
-        return Team(raw.documentID, TeamError.InvalidDataStructure)
     }
-
+    
     fun raw(): RawEntity = RawEntity(teamID, mapOf("name" to name))
 }

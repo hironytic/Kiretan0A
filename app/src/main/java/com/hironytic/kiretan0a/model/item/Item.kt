@@ -26,6 +26,7 @@
 package com.hironytic.kiretan0a.model.item
 
 import com.hironytic.kiretan0a.model.util.Entity
+import com.hironytic.kiretan0a.model.util.EntityFactory
 import com.hironytic.kiretan0a.model.util.RawEntity
 import java.util.*
 
@@ -42,14 +43,16 @@ class Item(
 ) : Entity {
     private constructor(itemID: String, error: ItemError) : this(itemID, "", false, null, error)
 
-    companion object fun fromRawEntity(raw: RawEntity): Item {
-        val name = raw.data["name"] ?: ""
-        val isInsufficient = raw.data["insufficient"] ?: false
-        if (name !is String || isInsufficient !is Boolean) {
-            return Item(raw.documentID, ItemError.InvalidDataStructure)
+    companion object Factory: EntityFactory<Item> {
+        override fun fromRawEntity(raw: RawEntity): Item {
+            val name = raw.data["name"] ?: ""
+            val isInsufficient = raw.data["insufficient"] ?: false
+            if (name !is String || isInsufficient !is Boolean) {
+                return Item(raw.documentID, ItemError.InvalidDataStructure)
+            }
+            val lastChange = raw.data["last_change"] as? Date
+            return Item(raw.documentID, name, isInsufficient, lastChange)
         }
-        val lastChange = raw.data["last_change"] as? Date
-        return Item(raw.documentID, name, isInsufficient, lastChange)
     }
 
     fun raw(): RawEntity {

@@ -28,3 +28,7 @@ package com.hironytic.kiretan0a.model.util
 data class RawEntity(val documentID: String, val data: Map<String, Any>)
 
 interface Entity
+
+interface EntityFactory<out T: Entity> {
+    fun fromRawEntity(raw: RawEntity): T
+}
