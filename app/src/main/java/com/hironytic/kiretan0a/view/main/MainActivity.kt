@@ -60,7 +60,12 @@ class MainActivity : AppCompatActivity() {
         fun onAdd(view: View) = viewModel.onAdd()
     }
 
-    private class ItemViewHolder(val binding: ItemMainBinding) : RecyclerView.ViewHolder(binding.root)
+    private class ItemViewHolder(val binding: ItemMainBinding) : RecyclerView.ViewHolder(binding.root) {
+        fun bind(itemBindingModel: ItemBindingModel) {
+            binding.model = itemBindingModel
+            binding.executePendingBindings()
+        }
+    }
     
     private class ItemListAdapter : RecyclerView.Adapter<ItemViewHolder>() {
         private val items = ArrayList<ItemBindingModel>()
@@ -74,9 +79,7 @@ class MainActivity : AppCompatActivity() {
 
         override fun onBindViewHolder(holder: ItemViewHolder?, position: Int) {
             val bm = items[position]
-            holder?.apply { 
-                binding.model = bm
-            }
+            holder?.bind(bm)
         }
         
         fun insertItem(index: Int, bindingModel: ItemBindingModel) {
