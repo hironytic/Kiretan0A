@@ -72,14 +72,14 @@ class MainActivity : AppCompatActivity() {
         
         override fun getItemCount(): Int = items.size
 
-        override fun onCreateViewHolder(parent: ViewGroup?, viewType: Int): ItemViewHolder {
-            val binding: ItemMainBinding = DataBindingUtil.inflate(LayoutInflater.from(parent!!.context), R.layout.item_main, parent, false)
+        override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ItemViewHolder {
+            val binding: ItemMainBinding = DataBindingUtil.inflate(LayoutInflater.from(parent.context), R.layout.item_main, parent, false)
             return ItemViewHolder(binding)
         }
 
-        override fun onBindViewHolder(holder: ItemViewHolder?, position: Int) {
+        override fun onBindViewHolder(holder: ItemViewHolder, position: Int) {
             val bm = items[position]
-            holder?.bind(bm)
+            holder.bind(bm)
         }
         
         fun insertItem(index: Int, bindingModel: ItemBindingModel) {
