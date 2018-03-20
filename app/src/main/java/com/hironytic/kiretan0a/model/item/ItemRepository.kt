@@ -51,7 +51,7 @@ class DefaultItemRepository : ItemRepository {
         val itemPath = dataStore.collection("team").document(teamID).collection("item")
         val itemQuery = itemPath
                 .whereEqualTo("insufficient", insufficient)
-                .orderBy("last_change", true)
+                .orderBy("last_change")
         return dataStore.observeCollection(itemQuery, Item.Factory)
     }
 
