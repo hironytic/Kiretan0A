@@ -61,6 +61,14 @@
             android:orientation="vertical"
             app:layoutManager="android.support.v7.widget.LinearLayoutManager"
             app:layout_behavior="@string/appbar_scrolling_view_behavior" />
+        <TextView
+            android:id="@+id/item_list_message"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            tools:text="Message"
+            android:text="@{model.itemListMessageText}"
+            android:visibility="@{model.itemListMessageVisibility}"
+            android:layout_gravity="center" />
 
         <android.support.design.widget.FloatingActionButton
             android:id="@+id/fab"

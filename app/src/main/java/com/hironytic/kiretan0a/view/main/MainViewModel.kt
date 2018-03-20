@@ -25,8 +25,11 @@
 
 package com.hironytic.kiretan0a.view.main
 
+import android.app.Application
+import android.arch.lifecycle.AndroidViewModel
 import android.arch.lifecycle.LiveData
-import android.arch.lifecycle.ViewModel
+import android.view.View
+import com.hironytic.kiretan0a.R
 import com.hironytic.kiretan0a.model.item.DefaultItemRepository
 import com.hironytic.kiretan0a.model.item.ItemRepository
 import com.hironytic.kiretan0a.model.team.DefaultTeamRepository
@@ -34,12 +37,15 @@ import com.hironytic.kiretan0a.model.team.TeamRepository
 import com.hironytic.kiretan0a.model.util.CollectionEvent
 import com.hironytic.kiretan0a.view.util.UpdateHint
 import com.hironytic.kiretan0a.view.util.toLiveData
+import io.reactivex.Flowable
 
 class MainViewItemList(val viewModels: List<MainItemViewModel>, val hint: UpdateHint<MainItemViewModel>)
 
-class MainViewModel : ViewModel() {
+class MainViewModel(application: Application) : AndroidViewModel(application) {
     val title: LiveData<String>
     val itemList: LiveData<MainViewItemList>
+    val itemListMessageText: LiveData<String>
+    val itemListMessageVisibility: LiveData<Int>
 
     private val teamRepository: TeamRepository = DefaultTeamRepository()
     private val itemRepository: ItemRepository = DefaultItemRepository()
@@ -48,37 +54,86 @@ class MainViewModel : ViewModel() {
     
     fun onAdd() {
     }
+
+    private class ItemListState(
+        val viewModels: List<MainItemViewModel>,
+        val hint: UpdateHint<MainItemViewModel>,
+        val error: Throwable?
+    )
     
     init {
-        title = teamRepository
-                .team(TEAMID)
-                .map { it.map({ it.name }).orElse("") }
-                .toLiveData()
+        fun createTitle(): LiveData<String> {
+            return teamRepository
+                    .team(TEAMID)
+                    .map { it.map({ it.name }).orElse("") }
+                    .toLiveData()
+        }
 
-        itemList = itemRepository
-                .items(TEAMID, false)
-                .scan(MainViewItemList(listOf(), UpdateHint.Whole())) { acc, change ->
-                    val viewModels = acc.viewModels.toMutableList()
-                    val hintEvents = ArrayList<CollectionEvent<MainItemViewModel>>()
-                    for (event in change.events) {
-                        when (event) {
-                            is CollectionEvent.Inserted -> {
-                                val viewModel = MainItemViewModel().apply { name.value = event.item.name }
-                                viewModels.add(event.index, viewModel)
-                                hintEvents.add(CollectionEvent.Inserted(event.index, viewModel))
-                            }
-                            is CollectionEvent.Deleted -> {
-                                viewModels.removeAt(event.index)
-                                hintEvents.add(CollectionEvent.Deleted(event.index))
-                            }
-                            is CollectionEvent.Moved -> {
-                                viewModels.add(event.newIndex, viewModels.removeAt(event.oldIndex))
-                                hintEvents.add(CollectionEvent.Moved(event.oldIndex, event.newIndex))
+        fun createItemListState(): Flowable<ItemListState> {
+            return itemRepository
+                    .items(TEAMID, false)
+                    .scan(ItemListState(listOf(), UpdateHint.Whole(), null)) { acc, change ->
+                        val viewModels = acc.viewModels.toMutableList()
+                        val hintEvents = ArrayList<CollectionEvent<MainItemViewModel>>()
+                        for (event in change.events) {
+                            when (event) {
+                                is CollectionEvent.Inserted -> {
+                                    val viewModel = MainItemViewModel().apply { name.value = event.item.name }
+                                    viewModels.add(event.index, viewModel)
+                                    hintEvents.add(CollectionEvent.Inserted(event.index, viewModel))
+                                }
+                                is CollectionEvent.Deleted -> {
+                                    viewModels.removeAt(event.index)
+                                    hintEvents.add(CollectionEvent.Deleted(event.index))
+                                }
+                                is CollectionEvent.Moved -> {
+                                    viewModels.add(event.newIndex, viewModels.removeAt(event.oldIndex))
+                                    hintEvents.add(CollectionEvent.Moved(event.oldIndex, event.newIndex))
+                                }
                             }
                         }
+                        ItemListState(viewModels, UpdateHint.Partial(hintEvents), null)
                     }
-                    MainViewItemList(viewModels, UpdateHint.Partial(hintEvents))
-                }
-                .toLiveData()
+                    .onErrorReturn { ItemListState(listOf(), UpdateHint.Whole(), it) }
+                    .replay(1).refCount()
+        }
+
+        val itemListState = createItemListState()
+
+        fun createItemList(): LiveData<MainViewItemList> {
+            return itemListState
+                    .map { MainViewItemList(it.viewModels, it.hint) }
+                    .toLiveData()
+        }
+
+        fun createItemListMessageText(): LiveData<String> {
+            return itemListState
+                    .map {
+                        if (it.error != null) {
+                            application.getString(R.string.error_item_list)
+                        } else {
+                            ""
+                        }
+                    }
+                    .toLiveData()
+        }
+
+        fun createItemListMessageVisibility(): LiveData<Int> {
+            return itemListState
+                    .map {
+                        if (it.error != null) {
+                            View.VISIBLE
+                        }else {
+                            View.GONE
+                        }
+                    }
+                    .toLiveData()
+        }
+
+        // initialize properties
+        title = createTitle()
+        itemList = createItemList()
+        itemListMessageText = createItemListMessageText()
+        itemListMessageVisibility = createItemListMessageVisibility()
     }
 }

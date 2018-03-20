@@ -43,12 +43,15 @@ import com.hironytic.kiretan0a.model.util.CollectionEvent
 import com.hironytic.kiretan0a.view.util.UpdateHint
 import com.hironytic.kiretan0a.view.util.observeSafely
 import com.hironytic.kiretan0a.view.util.toObservableField
+import com.hironytic.kiretan0a.view.util.toObservableInt
 import com.hironytic.kiretan0a.view.welcome.WelcomeActivity
 import io.reactivex.rxkotlin.subscribeBy
 
 class MainActivity : AppCompatActivity() {
     class BindingModel(owner: LifecycleOwner, viewModel: MainViewModel) {
         val title = viewModel.title.toObservableField(owner)
+        val itemListMessageText = viewModel.itemListMessageText.toObservableField(owner)
+        val itemListMessageVisibility = viewModel.itemListMessageVisibility.toObservableInt(owner)
     }
     
     class ItemBindingModel(owner: LifecycleOwner, itemViewModel: MainItemViewModel) {
