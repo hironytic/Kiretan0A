@@ -27,7 +27,7 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools">
     <data>
-        <variable name="model" type="com.hironytic.kiretan0a.view.main.MainActivity.BindingModel" />
+        <variable name="model" type="com.hironytic.kiretan0a.view.main.MainViewModel" />
         <variable name="handlers" type="com.hironytic.kiretan0a.view.main.MainActivity.Handlers" />
     </data>
     <android.support.design.widget.CoordinatorLayout
@@ -67,7 +67,7 @@
             android:layout_height="wrap_content"
             tools:text="Message"
             android:text="@{model.itemListMessageText}"
-            android:visibility="@{model.itemListMessageVisibility}"
+            android:visibility="@{safeUnbox(model.itemListMessageVisibility)}"
             android:layout_gravity="center" />
 
         <android.support.design.widget.FloatingActionButton

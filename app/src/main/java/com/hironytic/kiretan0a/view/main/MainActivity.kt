@@ -42,41 +42,30 @@ import com.hironytic.kiretan0a.model.useraccount.DefaultUserAccountRepository
 import com.hironytic.kiretan0a.model.util.CollectionEvent
 import com.hironytic.kiretan0a.view.util.UpdateHint
 import com.hironytic.kiretan0a.view.util.observeSafely
-import com.hironytic.kiretan0a.view.util.toObservableField
-import com.hironytic.kiretan0a.view.util.toObservableInt
 import com.hironytic.kiretan0a.view.welcome.WelcomeActivity
 import io.reactivex.rxkotlin.subscribeBy
 
 class MainActivity : AppCompatActivity() {
-    class BindingModel(owner: LifecycleOwner, viewModel: MainViewModel) {
-        val title = viewModel.title.toObservableField(owner)
-        val itemListMessageText = viewModel.itemListMessageText.toObservableField(owner)
-        val itemListMessageVisibility = viewModel.itemListMessageVisibility.toObservableInt(owner)
-    }
-    
-    class ItemBindingModel(owner: LifecycleOwner, itemViewModel: MainItemViewModel) {
-        val name = itemViewModel.name.toObservableField(owner)
-    }
-    
     class Handlers(private val viewModel: MainViewModel) {
         @Suppress("UNUSED_PARAMETER")
         fun onAdd(view: View) = viewModel.onAdd()
     }
 
-    private class ItemViewHolder(val binding: ItemMainBinding) : RecyclerView.ViewHolder(binding.root) {
-        fun bind(itemBindingModel: ItemBindingModel) {
-            binding.model = itemBindingModel
+    private class ItemViewHolder(private val binding: ItemMainBinding) : RecyclerView.ViewHolder(binding.root) {
+        fun bind(itemViewModel: MainItemViewModel) {
+            binding.model = itemViewModel
             binding.executePendingBindings()
         }
     }
     
-    private class ItemListAdapter : RecyclerView.Adapter<ItemViewHolder>() {
-        private val items = ArrayList<ItemBindingModel>()
+    private class ItemListAdapter(private val lifecycleOwner: LifecycleOwner) : RecyclerView.Adapter<ItemViewHolder>() {
+        private val items = ArrayList<MainItemViewModel>()
         
         override fun getItemCount(): Int = items.size
 
         override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ItemViewHolder {
             val binding: ItemMainBinding = DataBindingUtil.inflate(LayoutInflater.from(parent.context), R.layout.item_main, parent, false)
+            binding.setLifecycleOwner(lifecycleOwner)
             return ItemViewHolder(binding)
         }
 
@@ -85,8 +74,8 @@ class MainActivity : AppCompatActivity() {
             holder.bind(bm)
         }
         
-        fun insertItem(index: Int, bindingModel: ItemBindingModel) {
-            items.add(index, bindingModel)
+        fun insertItem(index: Int, viewModel: MainItemViewModel) {
+            items.add(index, viewModel)
             notifyItemInserted(index)
         }
         
@@ -100,7 +89,7 @@ class MainActivity : AppCompatActivity() {
             notifyItemMoved(oldIndex, newIndex)
         }
         
-        fun updateItems(items: List<ItemBindingModel>) {
+        fun updateItems(items: List<MainItemViewModel>) {
             this.items.clear()
             this.items.addAll(items)
             notifyDataSetChanged()
@@ -114,29 +103,30 @@ class MainActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         binding = DataBindingUtil.setContentView(this, R.layout.activity_main)
+        binding.setLifecycleOwner(this)
         setSupportActionBar(binding.toolbar)
 
         viewModel = ViewModelProviders.of(this).get(MainViewModel::class.java)
-        
-        binding.model = BindingModel(this, viewModel)
+
+        binding.model = viewModel
         binding.handlers = Handlers(viewModel)
         
         viewModel.itemList.observeSafely(this) { itemList ->
             if (binding.itemList.adapter == null) {
-                val itemListAdapter = ItemListAdapter()
-                itemListAdapter.updateItems(itemList.viewModels.map { ItemBindingModel(this, it) })
+                val itemListAdapter = ItemListAdapter(this)
+                itemListAdapter.updateItems(itemList.viewModels)
                 binding.itemList.adapter = itemListAdapter
             } else {
                 val itemListAdapter = binding.itemList.adapter as ItemListAdapter
                 when (itemList.hint) {
                     is UpdateHint.Whole -> {
-                        itemListAdapter.updateItems(itemList.viewModels.map { ItemBindingModel(this, it) })
+                        itemListAdapter.updateItems(itemList.viewModels)
                     }
                     is UpdateHint.Partial -> {
                         for (change in itemList.hint.events) {
                             when (change) {
                                 is CollectionEvent.Inserted -> {
-                                    itemListAdapter.insertItem(change.index, ItemBindingModel(this, change.item))
+                                    itemListAdapter.insertItem(change.index, change.item)
                                 }
                                 is CollectionEvent.Deleted -> {
                                     itemListAdapter.removeItem(change.index)

@@ -28,7 +28,7 @@
     xmlns:tools="http://schemas.android.com/tools">
 
     <data>
-        <variable name="model" type="com.hironytic.kiretan0a.view.main.MainActivity.ItemBindingModel" />
+        <variable name="model" type="com.hironytic.kiretan0a.view.main.MainItemViewModel" />
     </data>
     
     <android.support.constraint.ConstraintLayout
