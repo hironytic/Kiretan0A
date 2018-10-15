@@ -29,7 +29,6 @@ import com.google.firebase.firestore.*
 import io.reactivex.BackpressureStrategy
 import io.reactivex.Completable
 import io.reactivex.Flowable
-import io.reactivex.Observable
 import java.util.*
 
 interface DataStore {
@@ -95,10 +94,10 @@ class DefaultDataStore : DataStore {
                 box.registration = (documentPath as DefaultDocumentPath).documentRef.addSnapshotListener { documentSnapshot, error ->
                     if (error != null) {
                         emitter.onError(error)
-                    } else {
+                    } else if (documentSnapshot != null) {
                         if (documentSnapshot.exists()) {
                             try {
-                                val entity = factory.fromRawEntity(RawEntity(documentSnapshot.id, documentSnapshot.data))
+                                val entity = factory.fromRawEntity(RawEntity(documentSnapshot.id, documentSnapshot.data!!))
                                 emitter.onNext(Optional.of(entity))
                             } catch (error: Throwable) {
                                 emitter.onError(error)
@@ -121,11 +120,11 @@ class DefaultDataStore : DataStore {
                 box.registration = (query as DefaultDataStoreQuery).query.addSnapshotListener { querySnapshot, error ->
                     if (error != null) {
                         emitter.onError(error)
-                    } else {
+                    } else if (querySnapshot != null) {
                         try {
                             val generatedEntities = mutableMapOf<String, E>()
                             val entity: (DocumentSnapshot) -> E = { doc ->
-                                generatedEntities.getOrPut(doc.id, { factory.fromRawEntity(RawEntity(doc.id, doc.data)) })
+                                generatedEntities.getOrPut(doc.id) { factory.fromRawEntity(RawEntity(doc.id, doc.data!!)) }
                             }
 
                             val result = querySnapshot.documents.map { entity(it) }
